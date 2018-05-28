@@ -26,22 +26,27 @@ class App(QWidget):
     def openFileNamesDialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        temp, _ = QFileDialog.getOpenFileNames(self, "QFileDialog.getOpenFileNames()", "",
-                                               "All Files (*);;Python Files (*.py)", options=options)
-        if len(temp) != 0:
+        self.move(QApplication.desktop(self).screen().rect().center() - self.rect().center())
+        temp = QFileDialog.getOpenFileNames(self, "Select Files", "",
+                                            "Mp3 Files (*.mp3);;All Files (*)", options=options)
+        if len(temp[0]) != 0 and temp is not None:
             for file in temp:
                 files.append(file)
             self.openRegexDialog()
+        else:
+            exit(0)
 
     def openRegexDialog(self):
         self.textbox = QLineEdit(self)
         self.textbox.move(20, 20)
-        self.title = "Type in your regex"
-        self.resize(400, 150)
+        self.title = 'Type in your regex'
+        self.setWindowTitle(self.title)
+        self.resize(400, 120)
         self.textbox.resize(280, 40)
         self.button = QPushButton('Confirm', self)
         self.button.move(20, 80)
         self.button.clicked.connect(self.on_click)
+        self.move(QApplication.desktop(self).screen().rect().center() - self.rect().center())
         self.show()
 
     def on_click(self):
@@ -60,22 +65,27 @@ class App(QWidget):
         regexbefore = regexsplit[0]
         regexmid = regexsplit[2]
         regexafter = regexsplit[4]
-        size = len(files)
-        for file in files:
+        for file in files[0]:
             temp = file.split('/')
-            file = temp[len(temp) - 1]
-            start = re.findall(regexbefore, file)[0]  # TODO
-            mid = re.findall(regexmid, file)[0]
-            end = re.findall(regexafter, file)[0]
+            filename = temp[len(temp) - 1]
+            if len(re.findall(regexbefore, filename)) == 0:
+                continue
+            start = re.findall(regexbefore, filename)[0]
+            if len(re.findall(regexmid, filename)) == 0:
+                continue
+            mid = re.findall(regexmid, filename)[0]
+            if len(re.findall(regexafter, filename)) == 0:
+                continue
+            end = re.findall(regexafter, filename)[0]
             if len(mid) != 0:
                 if len(start) != 0:
-                    author = file.split(start)[1].split(mid)[0]
+                    author = filename.split(start)[1].split(mid)[0]
                 else:
-                    author = file.split(mid)[0]
+                    author = filename.split(mid)[0]
                 if len(end) != 0:
-                    title = file.split(mid)[1].split(end)[0]
+                    title = filename.split(mid)[1].split(end)[0]
                 else:
-                    title = file.split(mid)[1]
+                    title = filename.split(mid)[1]
             else:
                 continue
             if first == "title":
@@ -83,6 +93,7 @@ class App(QWidget):
                 title = author
                 author = temp
             os.system('id3v2 -t "' + title + '" -a "' + author + '" "' + file + '"')
+        exit(0)
 
 
 def addtags():
@@ -100,15 +111,21 @@ def addtags():
     regexbefore = regexsplit[0]
     regexmid = regexsplit[2]
     regexafter = regexsplit[4]
-    regexfind = regexbefore + "*" + regexmid + "*" + regexafter
     os.chdir(directory)
     print("Songs tagged:")
-    size = len(glob.glob(regexfind))
-    for file in glob.glob(regexfind):
-        print(file)
+    size = len(glob.glob("*"))
+    for file in glob.glob("*"):
+
+        if len(re.findall(regexbefore, file)) == 0:
+            continue
         start = re.findall(regexbefore, file)[0]
+        if len(re.findall(regexmid, file)) == 0:
+            continue
         mid = re.findall(regexmid, file)[0]
+        if len(re.findall(regexafter, file)) == 0:
+            continue
         end = re.findall(regexafter, file)[0]
+        print(file)
         if len(mid) != 0:
             if len(start) != 0:
                 author = file.split(start)[1].split(mid)[0]
@@ -149,20 +166,11 @@ def showui():
 
 
 if __name__ == '__main__':
-    # screen = app.primaryScreen()
-    # size = screen.size()
-    # w = QWidget()
-    # w.setLayout(QGridLayout())
-    # width = 500
-    # height = 500
-    # w.resize(height, width)
-    # w.move(size.width() / 2 - width / 2, size.height() / 2 - height / 2)
-    # w.setWindowTitle("AudioTagger")
     files = []
     app = QApplication(sys.argv)
-    ex = App()
     directory = os.getcwd()
     if len(sys.argv) == 1:
+        ex = App()
         showui()
     elif sys.argv[1] == "-v":
         showversion()
@@ -178,4 +186,3 @@ if __name__ == '__main__':
         print("Invalid arguments. See -h for help")
         exit(1)
     sys.exit(app.exec_())
-# /author/ - /title/
