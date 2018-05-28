@@ -26,7 +26,7 @@ class App(QWidget):
     def openFileNamesDialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        self.move(QApplication.desktop(self).screen().rect().center() - self.rect().center())
+        self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
         temp = QFileDialog.getOpenFileNames(self, "Select Files", "",
                                             "Mp3 Files (*.mp3);;All Files (*)", options=options)
         if len(temp[0]) != 0 and temp is not None:
@@ -46,7 +46,7 @@ class App(QWidget):
         self.button = QPushButton('Confirm', self)
         self.button.move(20, 80)
         self.button.clicked.connect(self.on_click)
-        self.move(QApplication.desktop(self).screen().rect().center() - self.rect().center())
+        self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
         self.show()
 
     def on_click(self):
