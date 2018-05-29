@@ -113,7 +113,6 @@ def addtags():
     regexafter = regexsplit[4]
     os.chdir(directory)
     print("Songs tagged:")
-    size = len(glob.glob("*"))
     for file in glob.glob("*"):
 
         if len(re.findall(regexbefore, file)) == 0:
@@ -165,7 +164,7 @@ def showui():
     ex.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     files = []
     app = QApplication(sys.argv)
     directory = os.getcwd()
